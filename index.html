@@ -1,23 +1,412 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-    <script src="./js/play.js"></script>
-    <link rel="stylesheet" href="./css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Bad Apple!! - ASCII艺术播放器</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- jQuery -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .main-container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    #cv {
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      max-width: 100%;
+      height: auto;
+    }
+
+    #txt {
+      font-size: 8px;
+      line-height: 8px;
+      font-family: 'Courier New', Monaco, 'Lucida Console', monospace;
+      color: #333;
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 15px;
+      max-height: 400px;
+      overflow-y: auto;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-play {
+      background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+      border: none;
+      border-radius: 50px;
+      padding: 12px 30px;
+      font-weight: bold;
+      color: white;
+      transition: all 0.3s ease;
+      transform: translateY(0);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-play:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+      color: white;
+    }
+
+    .btn-play:active {
+      transform: translateY(0);
+    }
+
+    .progress-container {
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 10px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .ascii-char {
+      display: inline;
+      white-space: pre;
+    }
+
+    .info-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 768px) {
+      #txt {
+        font-size: 6px;
+        line-height: 6px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <input type="button" id="button" value="开始播放" />
-    <!-- 
-        <canvas>元素自身是没有任何外观的，但是它在文档中创建了一个画板，同时还提供了很多强大的绘制客户端JavaScript的API
-    -->
-    <canvas id="cv"></canvas>
-    <div id="txt"></div>
-    <audio src="./audio/BADAPPLE!!Chi.mp3" id="audio"></audio>
+  <div class="container-fluid py-4">
+    <!-- 头部介绍 -->
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-10">
+        <div class="info-card text-center">
+          <h1 class="display-4 mb-3">
+            <span class="badge bg-dark">Bad Apple!!</span>
+            ASCII艺术播放器
+          </h1>
+          <p class="lead mb-4">
+            万物皆可Bad Apple！这是一个使用纯JavaScript实现的创意项目，
+            将经典的Bad Apple!!MV转换为ASCII字符艺术动画。
+          </p>
+          <div class="row text-center">
+            <div class="col-md-4">
+              <div class="feature-icon mx-auto">🎵</div>
+              <h5>音视频同步</h5>
+              <p class="small text-muted">精确的帧同步技术</p>
+            </div>
+            <div class="col-md-4">
+              <div class="feature-icon mx-auto">🎨</div>
+              <h5>灰度转换</h5>
+              <p class="small text-muted">智能像素灰度计算</p>
+            </div>
+            <div class="col-md-4">
+              <div class="feature-icon mx-auto">⚡</div>
+              <h5>实时渲染</h5>
+              <p class="small text-muted">Canvas API高效处理</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-10">
+        <div class="main-container p-4">
+          <!-- 控制面板 -->
+          <div class="text-center mb-4">
+            <button id="playBtn" class="btn btn-play btn-lg">
+              <i id="playIcon">▶️</i> <span id="playText">开始播放</span>
+            </button>
+          </div>
+
+          <!-- 进度显示 -->
+          <div class="progress-container" id="progressContainer" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <small class="text-muted">播放进度</small>
+              <small class="text-muted" id="progressText">0 / 4380</small>
+            </div>
+            <div class="progress" style="height: 8px;">
+              <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" role="progressbar"
+                style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- 画布和ASCII显示区域 -->
+          <div class="row">
+            <div class="col-lg-6 mb-4">
+              <div class="text-center">
+                <h5 class="mb-3">原始帧画面</h5>
+                <canvas id="cv" class="img-fluid"></canvas>
+              </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+              <div class="text-center">
+                <h5 class="mb-3">ASCII艺术转换</h5>
+                <div id="txt" class="text-start"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 技术说明 -->
+          <div class="mt-4">
+            <div class="accordion" id="techAccordion">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#techDetails">
+                    🔧 技术实现原理
+                  </button>
+                </h2>
+                <div id="techDetails" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <h6>🎯 核心技术栈：</h6>
+                    <ul class="mb-3">
+                      <li><strong>HTML5 Canvas API</strong> - 用于图像处理和像素数据获取</li>
+                      <li><strong>jQuery</strong> - 简化DOM操作和事件处理</li>
+                      <li><strong>Bootstrap 5</strong> - 响应式UI框架</li>
+                      <li><strong>JavaScript</strong> - 核心逻辑实现</li>
+                    </ul>
+
+                    <h6>⚙️ 工作原理：</h6>
+                    <ol>
+                      <li><strong>图像加载</strong> - 逐帧加载Bad Apple视频帧图片</li>
+                      <li><strong>Canvas渲染</strong> - 将图片绘制到Canvas画布上</li>
+                      <li><strong>像素分析</strong> - 使用getImageData()获取像素RGBA数据</li>
+                      <li><strong>灰度计算</strong> - 应用公式：0.299*R + 0.578*G + 0.114*B</li>
+                      <li><strong>字符映射</strong> - 根据灰度值映射到不同的ASCII字符</li>
+                      <li><strong>定时播放</strong> - 使用setTimeout实现50ms间隔的帧动画</li>
+                    </ol>
+
+                    <h6>🎨 ASCII字符集：</h6>
+                    <p class="font-monospace small bg-light p-2 rounded">
+                      # H Q & O C ? 7 > ! : - ; .
+                    </p>
+                    <p class="small text-muted">
+                      字符按密度从高到低排列，#最密集（黑色区域），.最稀疏（白色区域）
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 音频元素 -->
+    <audio id="audio" style="display: none;">
+      <source src="./audio/BADAPPLE!!Chi.mp3" type="audio/mpeg">
+      您的浏览器不支持音频播放。
+    </audio>
+  </div>
+
+  <script>
+    $(document).ready(function () {
+      // 变量声明
+      let $canvas = $('#cv');
+      let canvas = $canvas[0];
+      let context = canvas.getContext('2d');
+      let $txtDiv = $('#txt');
+      let $playBtn = $('#playBtn');
+      let $audio = $('#audio');
+      let $progressContainer = $('#progressContainer');
+      let $progressBar = $('#progressBar');
+      let $progressText = $('#progressText');
+      let $playIcon = $('#playIcon');
+      let $playText = $('#playText');
+
+      let img = new Image();
+      let index = 1;
+      let isPlaying = false;
+      let totalFrames = 4380;
+      let playInterval;
+
+      // 播放按钮点击事件
+      $playBtn.on('click', function () {
+        if (!isPlaying) {
+          startPlay();
+        } else {
+          stopPlay();
+        }
+      });
+
+      // 开始播放
+      function startPlay() {
+        isPlaying = true;
+        $playIcon.text('⏸️');
+        $playText.text('播放中...');
+        $playBtn.removeClass('btn-play').addClass('btn-warning');
+        $progressContainer.show();
+
+        playImg();
+        $audio[0].play().catch(e => {
+          console.log('音频播放失败:', e);
+        });
+      }
+
+      // 停止播放
+      function stopPlay() {
+        isPlaying = false;
+        $playIcon.text('▶️');
+        $playText.text('开始播放');
+        $playBtn.removeClass('btn-warning').addClass('btn-play');
+
+        if (playInterval) {
+          clearTimeout(playInterval);
+        }
+
+        $audio[0].pause();
+        resetPlayer();
+      }
+
+      // 重置播放器
+      function resetPlayer() {
+        index = 1;
+        $audio[0].load();
+        img.src = './img/badapple00001.jpg';
+        updateProgress();
+      }
+
+      // 播放图片序列
+      function playImg() {
+        if (index <= totalFrames && isPlaying) {
+          img.src = './img/badapple' + formatIndex(index) + '.jpg';
+          updateProgress();
+          index++;
+          playInterval = setTimeout(playImg, 50); // 20fps
+        } else if (index > totalFrames) {
+          // 播放完成
+          $playIcon.text('✅');
+          $playText.text('播放完成');
+          $playBtn.removeClass('btn-warning').addClass('btn-success');
+          isPlaying = false;
+
+          // 3秒后重置
+          setTimeout(() => {
+            resetPlayer();
+            $playIcon.text('▶️');
+            $playText.text('重新播放');
+            $playBtn.removeClass('btn-success').addClass('btn-play');
+            $progressContainer.hide();
+          }, 3000);
+        }
+      }
+
+      // 更新进度条
+      function updateProgress() {
+        let progress = ((index - 1) / totalFrames) * 100;
+        $progressBar.css('width', progress + '%');
+        $progressText.text((index - 1) + ' / ' + totalFrames);
+      }
+
+      // 格式化索引为4位数字符串
+      function formatIndex(index) {
+        return index.toString().padStart(5, '0');
+      }
+
+      // 根据灰度值转换为ASCII字符
+      function toText(gray) {
+        const chars = '#HQ&OC?7>!:-;.';
+        const step = 255 / chars.length;
+        const charIndex = Math.floor(gray / step);
+        return chars[Math.min(charIndex, chars.length - 1)];
+      }
+
+      // 计算RGB的灰度值
+      function getGray(r, g, b) {
+        return 0.299 * r + 0.578 * g + 0.114 * b;
+      }
+
+      // 初始化函数 - 将图像转换为ASCII
+      function init() {
+        // 设置画布尺寸
+        canvas.width = img.width;
+        canvas.height = img.height;
+        $txtDiv.css('width', img.width + 'px');
+
+        // 绘制图像到画布
+        context.drawImage(img, 0, 0);
+
+        // 获取图像数据
+        let imgData = context.getImageData(0, 0, img.width, img.height);
+        let data = imgData.data;
+        let width = imgData.width;
+        let height = imgData.height;
+
+        // 转换为ASCII字符
+        let html = '';
+        const stepX = 6; // 水平采样间隔
+        const stepY = 12; // 垂直采样间隔
+
+        for (let y = 0; y < height; y += stepY) {
+          let line = '';
+          for (let x = 0; x < width; x += stepX) {
+            let pixelIndex = (y * width + x) * 4;
+            let r = data[pixelIndex];
+            let g = data[pixelIndex + 1];
+            let b = data[pixelIndex + 2];
+            let gray = getGray(r, g, b);
+            line += toText(gray);
+          }
+          html += '<div class="ascii-line">' + line + '</div>';
+        }
+
+        $txtDiv.html(html);
+      }
+
+      // 图片加载完成事件
+      img.onload = init;
+
+      // 初始化第一帧
+      img.src = './img/badapple00001.jpg';
+
+      // 错误处理
+      img.onerror = function () {
+        $txtDiv.html('<div class="alert alert-warning">图片加载失败，请检查图片路径是否正确</div>');
+      };
+    });
+  </script>
 </body>
 
 </html>
